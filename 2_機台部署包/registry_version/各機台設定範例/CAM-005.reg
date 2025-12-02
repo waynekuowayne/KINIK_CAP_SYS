@@ -1,0 +1,8 @@
+Windows Registry Editor Version 5.00
+
+; 機台 CAM-005 設定檔
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\MachineConfig]
+"MachineID"="CAM-005"
+"MachineName"="拍照機E"
+"MachineIP"=""

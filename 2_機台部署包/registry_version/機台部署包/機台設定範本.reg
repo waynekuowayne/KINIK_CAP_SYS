@@ -1,0 +1,36 @@
+Windows Registry Editor Version 5.00
+
+; ========================================
+; 中砂拍照機台設定檔
+; ========================================
+; 使用方法：
+; 1. 修改下方的機台編號、機台名稱
+; 2. 雙擊此檔案匯入登錄檔
+; 3. 執行 VB.NET 程式
+; ========================================
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE]
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\MachineConfig]
+"MachineID"="CAM-001"
+"MachineName"="拍照機A"
+"MachineIP"=""
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\CurrentTask]
+"TaskID"=dword:00000000
+"TaskName"=""
+"TotalImages"=dword:0000015e
+"Progress"=dword:00000000
+"Status"="idle"
+"StartTime"=""
+"LastUpdate"=""
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\Heartbeat]
+"LastHeartbeat"=""
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\DatabaseConfig]
+"Server"="122.100.99.161"
+"Port"=dword:0000a8fa
+"Database"="db_camera"
+"Username"="A999"
+"Password"="1023"

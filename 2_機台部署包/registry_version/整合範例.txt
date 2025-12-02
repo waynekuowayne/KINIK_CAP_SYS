@@ -1,0 +1,108 @@
+========================================
+如何整合到您現有的 VB.NET 主程式
+========================================
+
+## 步驟 1：加入 RegistryHelper.vb 到您的專案
+
+1. 將 RegistryHelper.vb 檔案加入您的 VB.NET 專案
+2. 不需要修改任何現有程式碼
+
+## 步驟 2：在您的主程式中只加入 3 行程式碼
+
+========================================
+範例：您現有的拍照程式碼
+========================================
+
+' ===== 您原本的程式碼 =====
+Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
+    Dim batchNumber As String = txtBatchNumber.Text
+    Dim totalImages As Integer = 350
+
+    ' ========== 加入這 1 行 ==========
+    RegistryHelper.CreateTask(batchNumber, totalImages)
+    ' ================================
+
+    ' 您原本的拍照迴圈
+    For i As Integer = 1 To totalImages
+        ' 您的拍照程式碼
+        Camera.Capture()
+        SaveImage(i)
+        ProcessImage(i)
+        ' ... 您的其他程式碼 ...
+
+        ' ========== 每 10 張加入這 1 行 ==========
+        If i Mod 10 = 0 Then
+            RegistryHelper.UpdateProgress(i, totalImages)
+        End If
+        ' =========================================
+
+        Application.DoEvents()
+    Next
+
+    ' 拍照完成
+    MessageBox.Show("拍攝完成！")
+
+    ' ========== 加入這 1 行 ==========
+    RegistryHelper.SetIdle()
+    ' ================================
+End Sub
+
+========================================
+就這樣！只需要加入 3 行程式碼
+========================================
+
+1. 開始拍照時：RegistryHelper.CreateTask(batchNumber, totalImages)
+2. 進度更新時：RegistryHelper.UpdateProgress(i, totalImages)
+3. 拍照完成時：RegistryHelper.SetIdle()
+
+========================================
+優點
+========================================
+
+✓ 不需要修改您原本的程式邏輯
+✓ 只加入 3 行程式碼
+✓ 即使 Registry 寫入失敗，也不會影響主程式運作
+✓ RegistryHelper 內部處理所有 Registry 操作
+✓ 您的主程式保持簡潔
+
+========================================
+完整流程
+========================================
+
+您的主程式（只改 3 行）
+    ↓ 寫入
+Windows Registry
+    ↓ 每 3 秒同步
+Python 背景程式（不用管）
+    ↓ 上傳
+MySQL 資料庫
+    ↓ 查詢
+前端網頁（自動顯示）
+
+========================================
+不需要的東西
+========================================
+
+✗ 不需要資料庫連線字串
+✗ 不需要資料庫操作程式碼
+✗ 不需要 SQL 語句
+✗ 不需要處理網路連線
+✗ 不需要處理資料庫錯誤
+
+全部交給 Python 背景程式處理！
+
+========================================
+如果您想要更新頻率更高
+========================================
+
+原本是每 10 張更新一次：
+    If i Mod 10 = 0 Then
+
+改成每 5 張：
+    If i Mod 5 = 0 Then
+
+改成每 1 張（即時更新）：
+    ' 直接呼叫，不需要 If
+    RegistryHelper.UpdateProgress(i, totalImages)
+
+========================================

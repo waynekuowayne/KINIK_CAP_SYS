@@ -1,0 +1,157 @@
+========================================
+舊方法 vs 新方法 - 程式碼改動比較
+========================================
+
+========================================
+【舊方法】直接連接資料庫
+========================================
+
+需要在主程式中加入：
+
+1. 資料庫連線字串
+2. 資料庫連線程式碼
+3. SQL INSERT 語句
+4. SQL UPDATE 語句
+5. 錯誤處理
+6. 網路斷線重連
+7. Transaction 處理
+
+程式碼量：約 200+ 行
+
+範例程式碼：
+--------------------
+Imports MySql.Data.MySqlClient
+
+Dim conn As MySqlConnection
+Dim cmd As MySqlCommand
+
+Try
+    conn = New MySqlConnection("Server=122.100.99.161;Port=43306;Database=db_camera;Uid=A999;Pwd=1023;")
+    conn.Open()
+
+    cmd = New MySqlCommand("INSERT INTO tasks (machine_id, task_name, total_images, progress, status) VALUES (@mid, @name, @total, @progress, @status)", conn)
+    cmd.Parameters.AddWithValue("@mid", machineId)
+    cmd.Parameters.AddWithValue("@name", batchNumber)
+    cmd.Parameters.AddWithValue("@total", totalImages)
+    cmd.Parameters.AddWithValue("@progress", i)
+    cmd.Parameters.AddWithValue("@status", "in_progress")
+    cmd.ExecuteNonQuery()
+
+Catch ex As MySqlException
+    ' 處理資料庫錯誤
+    MessageBox.Show("資料庫錯誤：" & ex.Message)
+Finally
+    If conn IsNot Nothing Then conn.Close()
+End Try
+--------------------
+
+❌ 每台機台都要改機台編號
+❌ 資料庫密碼寫在程式碼裡
+❌ 需要重新編譯
+❌ 網路有問題會影響主程式
+❌ 程式碼很長很複雜
+
+========================================
+【新方法】Registry + Python 背景同步
+========================================
+
+只需要在主程式中加入：
+
+1. 加入 RegistryHelper.vb 檔案到專案
+2. 在 3 個位置各加 1 行程式碼
+
+程式碼量：3 行
+
+範例程式碼：
+--------------------
+' 開始拍照時
+RegistryHelper.CreateTask(batchNumber, 350)
+
+' 進度更新時（在您的 FOR 迴圈內）
+If i Mod 10 = 0 Then
+    RegistryHelper.UpdateProgress(i, 350)
+End If
+
+' 拍照完成時
+RegistryHelper.SetIdle()
+--------------------
+
+✓ 所有機台使用同一個 exe
+✓ 不需要資料庫密碼
+✓ 不需要重新編譯
+✓ 網路問題不影響主程式
+✓ 程式碼超簡潔
+
+========================================
+對照表
+========================================
+
+項目                     舊方法          新方法
+─────────────────────────────────────────
+程式碼行數               200+ 行         3 行
+需要資料庫連線           是              否
+需要 SQL 知識            是              否
+網路斷線影響主程式       是              否
+每台機台需要重新編譯     是              否
+機台編號寫在程式碼       是              否
+部署時間（每台）         15 分鐘         2 分鐘
+
+========================================
+您現有主程式的改動
+========================================
+
+假設您的主程式長這樣：
+
+┌─────────────────────────────────────┐
+│ Form1.vb（您的主程式）               │
+│                                     │
+│ 1000 行程式碼                        │
+│ - 相機控制                           │
+│ - 影像處理                           │
+│ - PLC 通訊                           │
+│ - ... 您的商業邏輯 ...              │
+└─────────────────────────────────────┘
+
+只需要在這 1000 行程式碼中：
+- 加入 1 個檔案：RegistryHelper.vb
+- 加入 3 行程式碼：CreateTask, UpdateProgress, SetIdle
+
+其他 997 行程式碼完全不動！
+
+========================================
+實際整合步驟
+========================================
+
+步驟 1：複製檔案
+---------------
+將 RegistryHelper.vb 複製到您的專案資料夾
+
+步驟 2：加入專案
+---------------
+在 Visual Studio 中：
+方案總管 → 右鍵「加入」→「現有項目」→ 選擇 RegistryHelper.vb
+
+步驟 3：修改主程式（只改 3 個地方）
+-----------------------------------
+找到您的拍照按鈕事件，加入：
+
+位置 1：按鈕點擊開始拍照時
+    RegistryHelper.CreateTask(批號, 總數)
+
+位置 2：FOR 迴圈內（您拍照的地方）
+    If i Mod 10 = 0 Then
+        RegistryHelper.UpdateProgress(i, 總數)
+    End If
+
+位置 3：拍照完成時
+    RegistryHelper.SetIdle()
+
+步驟 4：編譯
+-----------
+F6 編譯
+
+步驟 5：完成
+-----------
+產生的 exe 就可以用在所有機台！
+
+========================================

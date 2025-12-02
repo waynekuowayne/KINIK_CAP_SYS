@@ -1,0 +1,8 @@
+Windows Registry Editor Version 5.00
+
+; 機台 CAM-003 設定檔
+
+[HKEY_CURRENT_USER\Software\ZHAOI\VALUE\MachineConfig]
+"MachineID"="CAM-003"
+"MachineName"="拍照機C"
+"MachineIP"=""
